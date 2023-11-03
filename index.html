@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+    <style>
+        /* Reset some default styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Global styles */
+        /* Heading styles */
+        h1 {
+            height: 50px;
+            margin: 0;
+            text-align: center;
+            background-color: #483a82;
+            color: #fff;
+            padding: 10px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            /* Add a subtle shadow */
+        }
+
+        .notes-container {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Note Form styles */
+        .note-form {
+            margin-bottom: 20px;
+        }
+
+        #note-input {
+            height: 40vh;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #add-button,
+        #toggle-button,
+        #save-button,
+        #clear-button,#toggle-ordered-list-button,#toggle-unordered-list-button {
+            background-color: #420795;
+            color: #fff;
+            border: 4px solid;
+            border-radius: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #toggle-ordered-list-button,#toggle-unordered-list-button {
+            color: #fff;
+            border: 4px solid;
+            border-radius: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #add-button:hover,
+        #toggle-button:hover,
+        #save-button:hover,
+        #clear-button:hover,#toggle-ordered-list-button:hover,#toggle-unordered-list-button:hover {
+            background-color: #420795;
+            color: #fff;
+            border: 4px solid #ccc;
+            border-radius: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        /* Notes List styles */
+        ul#notes-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        .note-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .date-time {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .view-button {
+            background-color: #f9ccf7;
+            color: #4a3131;
+            border: 2px solid white;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 0px 5px;
+        }
+
+        .delete-button {
+            background-color: #eae614;
+            color: #4a3131;
+            border: 2px solid white;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 0px 5px;
+        }
+
+        .save-button {
+            background-color: #a7ffc0;
+            color: #000;
+            border: 2px solid white;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 0px 5px;
+        }
+
+        .view-button:hover {
+            background-color: #f9ccf7;
+            color: #000;
+            border: 2px solid rgb(217, 141, 141);
+            border-radius: 5px;
+        }
+
+        .delete-button:hover {
+            background-color: #eae614;
+            color: #000;
+            border: 2px solid #a79898;
+            border-radius: 5px;
+
+        }
+
+        .save-button:hover {
+            background-color: #9dfa50;
+            color: #000;
+            border: 2px solid rgb(32, 207, 12);
+            border-radius: 5px;
+
+        }
+
+        /* Update the note text box styles to make it look like a comment box with text overflow handling */
+        .note-text {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 16px;
+            border: 5px solid #f6f5f5;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: rgb(247, 238, 238);
+            margin-top: 10px;
+            max-height: 150px;
+            transition: var(#483a82);
+            overflow: auto;
+            /* Add scrollbars when content overflows */
+            line-height: 1.5;
+            /* Adjust line height for better readability */
+            text-align: left;
+            /* Align text to the left within the box */
+        }
+
+        .note-text:hover {
+            border: 5px solid rgb(230, 213, 213);
+            border-radius: 5px;
+            box-shadow: #f9ccf7;
+        }
+
+
+        /* Hidden class to hide elements */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>NOTES</h1>
+    <div class="notes-container">
+        <div class="note-form">
+            <textarea id="note-input" placeholder="Enter a new note..."></textarea>
+            <button id="add-button">Add</button>
+            <button id="toggle-ordered-list-button">Ordered List</button>
+            <button id="toggle-unordered-list-button">Unordered List</button>
+            <button id="save-button">Save</button>
+            <button id="clear-button">Clear</button>
+            <button id="toggle-button">Hide/View Notes</button>
+
+        </div>
+        <ul id="notes-list"></ul>
+    </div>
+    <script>
+        // Load saved notes from local storage
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+        // Function to update the list of notes
+        function updateNotes() {
+            const notesList = document.getElementById('notes-list');
+            notesList.innerHTML = '';
+
+            for (let i = 0; i < notes.length; i++) {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="note-content">
+                        <span class="date-time">${notes[i].date}</span>
+                       <!-- I have removed Esit button -->
+                        <button class="delete-button" data-index="${i}">Delete</button>
+                        <button class="view-button" data-index="${i}">View</button> 
+                    </div>
+                    <div class="note-text" contenteditable="false">${notes[i].text}</div>
+                `;
+                notesList.appendChild(li);
+            }
+
+            // Function to view a note
+            function viewNoteInInputBox(index) {
+                const noteInput = document.getElementById('note-input');
+                noteInput.value = notes[index].text;
+            }
+
+
+            // Function to view a note in the note input box
+            function viewNoteInInputBox(index) {
+                const noteInput = document.getElementById('note-input');
+                noteInput.value = notes[index].text;
+                // Set a data-index attribute to the note input to know which note is being edited
+                noteInput.setAttribute('data-index', index);
+            }
+
+            // Function to save an edited note back in its original place
+            function saveEditedNote() {
+                const noteInput = document.getElementById('note-input');
+                const index = noteInput.getAttribute('data-index');
+                if (index !== null) {
+                    notes[index].text = noteInput.value;
+                    saveNotesToLocalStorage();
+                    updateNotes(); // Update the list of notes
+                    noteInput.removeAttribute('data-index'); // Clear the data-index attribute
+                }
+            }
+
+            // Function to make a note text box editable
+            function makeEditable(noteTextElement) {
+                noteTextElement.contentEditable = 'true';
+                noteTextElement.classList.add('editable');
+                noteTextElement.focus();
+            }
+
+            // Function to make a note text box non-editable
+            function makeNonEditable(noteTextElement) {
+                noteTextElement.contentEditable = 'false';
+                noteTextElement.classList.remove('editable');
+            }
+
+
+            // Attach event listeners to view buttons
+            const viewButtons = document.querySelectorAll('.view-button');
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const index = this.getAttribute('data-index');
+                    viewNoteInInputBox(index);
+                });
+            });
+
+            // Function to clear the note input box
+            function clearNoteInputBox() {
+                const noteInput = document.getElementById('note-input');
+                noteInput.value = '';
+                noteInput.removeAttribute('data-index'); // Clear the data-index attribute
+            }
+
+            // Attach event listener to the "Clear" button
+            document.getElementById('clear-button').addEventListener('click', function () {
+                clearNoteInputBox();
+            });
+
+
+            // Attach event listener to the "Save" button
+            document.getElementById('save-button').addEventListener('click', function () {
+                saveEditedNote();
+            });
+
+            // Attach event listeners to edit buttons
+            const editButtons = document.querySelectorAll('.edit-button');
+            editButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const index = this.getAttribute('data-index');
+                    const noteTextElement = this.parentNode.nextElementSibling;
+                    noteTextElement.contentEditable = 'true';
+                    noteTextElement.focus();
+                });
+            });
+
+            // Attach event listeners to save buttons
+            const saveButtons = document.querySelectorAll('.save-button');
+            saveButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const index = this.getAttribute('data-index');
+                    const noteTextElement = this.parentNode.nextElementSibling;
+                    noteTextElement.contentEditable = 'false';
+                    notes[index].text = noteTextElement.textContent;
+                    saveNotesToLocalStorage();
+                });
+            });
+
+
+            // Attach event listeners to delete buttons
+            const deleteButtons = document.querySelectorAll('.delete-button');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const index = this.getAttribute('data-index');
+                    notes.splice(index, 1);
+                    updateNotes();
+                    saveNotesToLocalStorage();
+                });
+            });
+        }
+
+        // Function to save notes to local storage
+        function saveNotesToLocalStorage() {
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        // Toggle visibility of notes
+        function toggleNotesVisibility() {
+            const notesList = document.getElementById('notes-list');
+            notesList.classList.toggle('hidden');
+        }
+
+        // Initialize the app
+        updateNotes();
+
+        // Event listener for adding a new note
+        document.getElementById('add-button').addEventListener('click', function () {
+            const noteInput = document.getElementById('note-input');
+            const newNoteText = noteInput.value.trim();
+
+            if (newNoteText !== '') {
+                const newNote = {
+                    date: new Date().toLocaleString(),
+                    text: newNoteText,
+                };
+                notes.push(newNote);
+                updateNotes();
+                saveNotesToLocalStorage();
+                noteInput.value = '';
+            }
+        });
+
+        // Event listener for toggling notes visibility
+        document.getElementById('toggle-button').addEventListener('click', toggleNotesVisibility);
+
+
+       
+        let isOrdered = false; // Indicates the current list type (ordered or unordered)
+        let isUnordered = false;
+
+        // Function to handle the Enter key press
+        function handleEnterKey(event) {
+            if (event.key === 'Enter' && (isOrdered || isUnordered)) {
+                const noteInput = document.getElementById('note-input');
+                const currentText = noteInput.value;
+
+                if (isOrdered) {
+                    // For an ordered list, increment the list number
+                    const lines = currentText.split('\n');
+                    const lastLine = lines[lines.length - 1].trim();
+                    if (lastLine.match(/^\d+\./)) {
+                        const newNumber = parseInt(lastLine, 10) + 1;
+                        noteInput.value += '\n' + newNumber + '. ';
+                    } else {
+                        noteInput.value += '\n1. ';
+                    }
+                } else if (isUnordered) {
+                    // For an unordered list, use an asterisk (*) as the bullet point
+                    noteInput.value += '\n* ';
+                }
+
+                // Prevent the default behavior of the Enter key
+                event.preventDefault();
+            }
+        }
+
+        // Attach event listener to the note input for handling Enter key
+        const noteInput = document.getElementById('note-input');
+        noteInput.addEventListener('keydown', handleEnterKey);
+
+        // Function to toggle between ordered and unordered lists
+        function toggleListType(button) {
+            const noteInput = document.getElementById('note-input');
+            const currentText = noteInput.value;
+
+            if (button === 'ordered') {
+                isOrdered = !isOrdered;
+                isUnordered = false;
+                noteInput.value = currentText;
+            } else if (button === 'unordered') {
+                isUnordered = !isUnordered;
+                isOrdered = false;
+                noteInput.value = currentText;
+            }
+
+            // Change the button colors
+            const orderedButton = document.getElementById('toggle-ordered-list-button');
+            const unorderedButton = document.getElementById('toggle-unordered-list-button');
+
+            if (isOrdered) {
+                orderedButton.style.backgroundColor = 'green';
+                unorderedButton.style.backgroundColor = '#420795';
+            } else if (isUnordered) {
+                orderedButton.style.backgroundColor = '#420795';
+                unorderedButton.style.backgroundColor = 'green';
+            } else {
+                orderedButton.style.backgroundColor = '#420795';
+                unorderedButton.style.backgroundColor = '#420795';
+            }
+        }
+
+        // Attach event listeners to the toggle list buttons
+        const orderedButton = document.getElementById('toggle-ordered-list-button');
+        const unorderedButton = document.getElementById('toggle-unordered-list-button');
+
+        orderedButton.addEventListener('click', function () {
+            toggleListType('ordered');
+        });
+
+        unorderedButton.addEventListener('click', function () {
+            toggleListType('unordered');
+        });
+
+        // Initialize the button colors
+        orderedButton.style.backgroundColor = '#420795';
+        unorderedButton.style.backgroundColor = '#420795';
+
+    </script>
+</body>
+
+</html>
